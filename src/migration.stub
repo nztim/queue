@@ -1,0 +1,25 @@
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateQueuemgrJobsTable extends Migration {
+
+    public function up()
+    {
+        Schema::create('queuemgr-jobs', function(Blueprint $table)
+        {
+            $table->bigIncrements('id');
+            $table->binary('job');
+            $table->tinyInteger('attempts')->unsigned();
+            $table->softDeletes();
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::drop('queuemgr-jobs');
+    }
+
+}
