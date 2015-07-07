@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class QueuedJob extends Model
 {
     // Eloquent ===============================================================
-    protected $table = 'queuemgr-jobs';
+    protected $table = 'queuemgrjobs';
     use SoftDeletes;
     protected $dates = ['deleted_at'];
 
