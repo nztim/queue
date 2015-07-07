@@ -7,19 +7,18 @@ class CreateQueuemgrJobsTable extends Migration {
 
     public function up()
     {
-        Schema::create('queuemgr-jobs', function(Blueprint $table)
+        Schema::create('queuemgrjobs', function(Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->binary('job');
             $table->tinyInteger('attempts')->unsigned();
             $table->softDeletes();
             $table->timestamps();
         });
+        DB::statement("ALTER TABLE queuemgrjobs ADD job MEDIUMBLOB AFTER id");
     }
 
     public function down()
     {
-        Schema::drop('queuemgr-jobs');
+        Schema::drop('queuemgrjobs');
     }
-
 }
