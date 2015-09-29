@@ -36,7 +36,7 @@ If you process the queue frequently and the processes are slow, it's possible to
 If there is a server problem and the mutex file used by `withoutOverlapping()` is not cleared, the process command may not be able to run successfully.
 Scheduling `php artisan queuemgr:check` will review all unprocessed jobs and log an error if the age is older than 1 hour.
 
-`$schedule->command('queuemgr:check')->everyHour();`
+`$schedule->command('queuemgr:check')->hourly();`
 
 Do not use `withoutOverlapping()` with this command to avoid the same problem occurring.
 Configure the maximum age (in hours) by setting the `.env` value `QUEUEMGR_MAX_AGE`.
