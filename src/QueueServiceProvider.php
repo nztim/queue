@@ -8,10 +8,11 @@ class QueueServiceProvider extends ServiceProvider
     protected $defer = false;
 
     protected $commands = [
-        'NZTim\Queue\Commands\AddMigrationCommand',
-        'NZTim\Queue\Commands\QueuemgrProcessCommand',
-        'NZTim\Queue\Commands\QueuemgrFailedCommand',
-        'NZTim\Queue\Commands\QueuemgrClearFailedCommand',
+        Commands\AddMigrationCommand::class,
+        Commands\QueuemgrProcessCommand::class,
+        Commands\QueuemgrFailedCommand::class,
+        Commands\QueuemgrClearFailedCommand::class,
+        Commands\QueuemgrCheckCommand::class,
     ];
     public function register()
     {

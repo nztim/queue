@@ -1,5 +1,6 @@
 <?php namespace NZTim\Queue;
 
+use Carbon\Carbon;
 use Exception;
 use Log;
 use NZTim\Queue\QueuedJob\QueuedJob;
@@ -57,5 +58,21 @@ class QueueManager
     public function clearFailed()
     {
         $this->queuedJobRepo->clearFailed();
+    }
+
+    public function check()
+    {
+        $queue = $this->queuedJobRepo->allOutstanding();
+        $maxAgeInHours = env('QUEUEMGR_MAX_AGE', 1);
+        $maxAge = Carbon::now()->subHours($maxAgeInHours);
+        $exceeded = false;
+        foreach ($queue as $job) {
+            if ($job->created_at < $maxAge) {
+                $exceeded = true;
+            }
+        }
+        if ($exceeded) {
+            Log::error("QueueMgr jobs queue has exceeded the maximum age ({$maxAgeInHours} hours). There may be a server problem, such as the mutex file not being cleared.");
+        }
     }
 }
