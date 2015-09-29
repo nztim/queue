@@ -67,7 +67,8 @@ class QueueManager
         $maxAge = Carbon::now()->subHours($maxAgeInHours);
         $exceeded = false;
         foreach ($queue as $job) {
-            if ($job->created_at < $maxAge) {
+            /** @var QueuedJob $job */
+            if (!$job->failed() && $job->created_at < $maxAge) {
                 $exceeded = true;
             }
         }
