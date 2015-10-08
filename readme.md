@@ -9,7 +9,7 @@ Add to $aliases: `'QueueMgr' => NZTim\Queue\QueueMgrFacade::class,`
 `php artisan queuemgr:migration` to add migration file
 `php artisan migrate` to run it
 
-Optional `.env` settings:  
+Optional `.env` setting:  
  - `QUEUEMGR_ATTEMPTS` sets the default number of attempts for a job
 
 ###Jobs
@@ -38,5 +38,6 @@ Scheduling `php artisan queuemgr:check` will review all unprocessed jobs and log
 
 `$schedule->command('queuemgr:check')->hourly();`
 
-Do not use `withoutOverlapping()` with this command to avoid the same problem occurring.
-Configure the maximum age (in hours) by setting the `.env` value `QUEUEMGR_MAX_AGE`.
+- Do not use `withoutOverlapping()` with this command to avoid the same problem occurring.
+- Configure the maximum age (in hours) by setting the `.env` value `QUEUEMGR_MAX_AGE`.
+- Receive an immediate email notification for a failed check by setting the `.env` value of `QUEUEMGR_EMAIL` to your email address

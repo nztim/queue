@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Exception;
 use Log;
+use Mail;
 use NZTim\Queue\QueuedJob\QueuedJob;
 use NZTim\Queue\QueuedJob\QueuedJobRepository;
 
@@ -73,7 +74,20 @@ class QueueManager
             }
         }
         if ($exceeded) {
-            Log::error("QueueMgr jobs queue has exceeded the maximum age ({$maxAgeInHours} hours). There may be a server problem, such as the mutex file not being cleared.");
+            $message = $this->message($maxAgeInHours);
+            Log::error($message);
+            $email = env('QUEUEMGR_EMAIL', null);
+            if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                Mail::raw($message, function ($message) use ($email) {
+                    $message->to($email)->subject('QueueMgr job queue failure on ' . url('/'));
+                });
+            }
         }
+    }
+
+    protected function message($maxAgeInHours)
+    {
+        $url = url('/');
+        return "The QueueMgr jobs queue on {$url} has exceeded the maximum age ({$maxAgeInHours} hours). There may be a server problem, such as the mutex file not being cleared.";
     }
 }
