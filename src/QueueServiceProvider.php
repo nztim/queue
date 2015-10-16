@@ -18,7 +18,7 @@ class QueueServiceProvider extends ServiceProvider
     {
         App::bind('queuemgr', function() {
             $repo = App::make(QueuedJob\QueuedJobRepository::class);
-            $mutexHandler = App::make(Mutexhandler::class);
+            $mutexHandler = App::make(MutexHandler::class);
             return new QueueManager($repo, $mutexHandler);
         });
         $this->commands($this->commands);
