@@ -11,11 +11,13 @@ class QueueManager
 {
     protected $attempts;
     protected $queuedJobRepo;
+    protected $mutexHandler;
 
-    public function __construct(QueuedJobRepository $queuedJobRepo)
+    public function __construct(QueuedJobRepository $queuedJobRepo, MutexHandler $mutexHandler)
     {
         $this->attempts = env('QUEUEMGR_ATTEMPTS', 5);
         $this->queuedJobRepo = $queuedJobRepo;
+        $this->mutexHandler = $mutexHandler;
     }
 
     public function add(Job $job)
@@ -26,6 +28,9 @@ class QueueManager
 
     public function process()
     {
+        if (!$this->mutexHandler->startRun()) {
+            return;
+        }
         $this->queuedJobRepo->purgeDeleted();
         $queue = $this->queuedJobRepo->allOutstanding();
         foreach($queue as $item) {
@@ -37,6 +42,7 @@ class QueueManager
                 $this->handleException($item, $e);
             }
         }
+        $this->mutexHandler->endRun();
     }
 
     protected function handleException(QueuedJob $item, Exception $e)
@@ -59,35 +65,5 @@ class QueueManager
     public function clearFailed()
     {
         $this->queuedJobRepo->clearFailed();
-    }
-
-    public function check()
-    {
-        $queue = $this->queuedJobRepo->allOutstanding();
-        $maxAgeInHours = env('QUEUEMGR_MAX_AGE', 1);
-        $maxAge = Carbon::now()->subHours($maxAgeInHours);
-        $exceeded = false;
-        foreach ($queue as $job) {
-            /** @var QueuedJob $job */
-            if (!$job->failed() && $job->created_at < $maxAge) {
-                $exceeded = true;
-            }
-        }
-        if ($exceeded) {
-            $message = $this->message($maxAgeInHours);
-            Log::error($message);
-            $email = env('QUEUEMGR_EMAIL', null);
-            if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                Mail::raw($message, function ($message) use ($email) {
-                    $message->to($email)->subject('QueueMgr job queue failure on ' . url('/'));
-                });
-            }
-        }
-    }
-
-    protected function message($maxAgeInHours)
-    {
-        $url = url('/');
-        return "The QueueMgr jobs queue on {$url} has exceeded the maximum age ({$maxAgeInHours} hours). There may be a server problem, such as the mutex file not being cleared.";
     }
 }

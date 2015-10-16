@@ -12,13 +12,14 @@ class QueueServiceProvider extends ServiceProvider
         Commands\QueuemgrProcessCommand::class,
         Commands\QueuemgrFailedCommand::class,
         Commands\QueuemgrClearFailedCommand::class,
-        Commands\QueuemgrCheckCommand::class,
     ];
+
     public function register()
     {
         App::bind('queuemgr', function() {
-            $repo = App::make('NZTim\Queue\QueuedJob\QueuedJobRepository');
-            return new QueueManager($repo);
+            $repo = App::make(QueuedJob\QueuedJobRepository::class);
+            $mutexHandler = App::make(Mutexhandler::class);
+            return new QueueManager($repo, $mutexHandler);
         });
         $this->commands($this->commands);
     }

@@ -11,7 +11,7 @@ Add to $aliases: `'QueueMgr' => NZTim\Queue\QueueMgrFacade::class,`
 
 Optional `.env` setting:  
  - `QUEUEMGR_ATTEMPTS` sets the default number of attempts for a job
-
+ 
 ###Jobs
 
 Job classes must implement `NZTim\Queue\Job` interface, which consists solely of a `handle()` method.
@@ -24,20 +24,20 @@ Job classes must implement `NZTim\Queue\Job` interface, which consists solely of
 
 All jobs are soft-deleted initially and purged after 1 month.
 
-The Laravel scheduler is recommended because it offers the ability to run the command often but without overlapping:    
-`$schedule->command('queuemgr:process')->withoutOverlapping()->everyMinute();`  or  
-`$schedule->command('queuemgr:process')->withoutOverlapping()->cron('*/2 * * * *');;`   
+The Laravel scheduler can be used however do not use `withoutOverlapping()` as it is currently too fragile.    
+`$schedule->command('queuemgr:process')->everyMinute();`  or  
+`$schedule->command('queuemgr:process')->cron('*/2 * * * *');;`   
 
 Alternatively, set your cron to run `queuemgr:process` at your preferred interval.   
-If you process the queue frequently and the processes are slow, it's possible to duplicate a job, so the Laravel scheduler is recommended. 
 
-### Monitoring
+### Preventing overlaps
 
-If there is a server problem and the mutex file used by `withoutOverlapping()` is not cleared, the process command may not be able to run successfully.
-Scheduling `php artisan queuemgr:check` will review all unprocessed jobs and log an error if the age is older than 1 hour.
+QueueMgr takes responsibility for preventing overlaps so you may run the command as often as you wish.
 
-`$schedule->command('queuemgr:check')->hourly();`
+A mutex file is used for preventing overlaps, and it contains a counter.
+If there is an error in processing the queue, or a server error, it's possible the mutex file will not be cleared.
+If processing is prevented 15 times by the same mutex file, then an error is logged, the counter is cleared and processing is allowed to continue.
 
-- Do not use `withoutOverlapping()` with this command to avoid the same problem occurring.
-- Configure the maximum age (in hours) by setting the `.env` value `QUEUEMGR_MAX_AGE`.
-- Receive an immediate email notification for a failed check by setting the `.env` value of `QUEUEMGR_EMAIL` to your email address
+Optional settings:  
+You can override the number of times by setting the `.env` value `QUEUEMGR_MAX_BLOCKED` to a value of your choice.
+You can opt to receive an email in the event by setting the `.env` value `QUEUEMGR_EMAIL` to your preferred email address.
