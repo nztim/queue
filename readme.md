@@ -23,10 +23,11 @@ Optional `.env` setting:
 - Completed jobs are soft-deleted initially and purged after 1 month.
 
 Typical Task Scheduler:
-<code php>
+
+```
 $schedule->command('queuemgr:process')->everyMinute()->withoutOverlapping();
 $schedule->command('queuemgr:check')->hourly();
-</code>
+```
 
 Alternatively, set your cron to run `queuemgr:process` at your preferred interval.
 
