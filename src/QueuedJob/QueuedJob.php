@@ -13,6 +13,12 @@ class QueuedJob extends Model
     use SoftDeletes;
     protected $dates = ['deleted_at'];
 
+    /*
+     * Completed jobs are soft-deleted and purged after 1 month
+     * Outstanding jobs are not deleted
+     * If attempts = 0 then they will not be tried again
+     */
+
     public function scopeOutstanding($query)
     {
         return $query->where('attempts', '>', 0);
@@ -29,18 +35,6 @@ class QueuedJob extends Model
     }
 
     // Entity =================================================================
-    /**
-     * @param Job $job
-     * @param $attempts
-     * @return QueuedJob
-     */
-    public static function newJob(Job $job, $attempts)
-    {
-        $queuedJob = new static;
-        $queuedJob->job = serialize($job);
-        $queuedJob->attempts = (int) $attempts;
-        return $queuedJob;
-    }
 
     public function getId()
     {

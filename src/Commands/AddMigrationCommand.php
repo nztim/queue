@@ -1,7 +1,6 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use Storage;
 
 class AddMigrationCommand extends Command
 {
@@ -14,7 +13,7 @@ class AddMigrationCommand extends Command
         // Create a new migration
         $name = 'create_queuemgr_jobs_table';
         $ds = DIRECTORY_SEPARATOR;
-        $path = $this->laravel->databasePath().$ds.'migrations';
+        $path = database_path().$ds.'migrations';
         $filename = $this->laravel['migration.creator']->create($name, $path);
         // Overwrite with migration content
         $content = file_get_contents(__DIR__.$ds.'..'.$ds.'migration.stub');

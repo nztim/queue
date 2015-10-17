@@ -13,8 +13,9 @@ class QueuemgrFailedCommand extends Command
     {
         $entries = QueueMgr::allFailed();
         foreach($entries as $entry) {
-            $class = get_class($entry->getJob());
-            $this->info("{$entry->created_at->format('Ymd.Hi')} | ID:{$entry->getId()} | {$class}");
+            $job = $entry->getJob();
+            $class = get_class($job);
+            $this->info("{$entry->created_at->format('Y-m-d @ H:i')} | ID:{$entry->getId()} | {$class}");
         }
     }
 }

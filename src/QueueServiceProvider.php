@@ -1,6 +1,7 @@
 <?php namespace NZTim\Queue;
 
 use App;
+use Illuminate\Mail\Mailer;
 use Illuminate\Support\ServiceProvider;
 
 class QueueServiceProvider extends ServiceProvider
@@ -12,14 +13,16 @@ class QueueServiceProvider extends ServiceProvider
         Commands\QueuemgrProcessCommand::class,
         Commands\QueuemgrFailedCommand::class,
         Commands\QueuemgrClearFailedCommand::class,
+        Commands\QueuemgrCheckCommand::class,
+        Commands\QueuemgrListCommand::class,
     ];
 
     public function register()
     {
         App::bind('queuemgr', function() {
             $repo = App::make(QueuedJob\QueuedJobRepository::class);
-            $mutexHandler = App::make(MutexHandler::class);
-            return new QueueManager($repo, $mutexHandler);
+            $mailer = App::make(Mailer::class);
+            return new QueueManager($repo, $mailer);
         });
         $this->commands($this->commands);
     }
