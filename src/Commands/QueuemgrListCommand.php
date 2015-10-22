@@ -23,13 +23,22 @@ class QueuemgrListCommand extends Command
         $days = $this->argument('days');
         $entries = $this->queueManager->recent($days);
         foreach($entries as $entry) {
-            $status = is_null($entry->deleted_at) ? "Incomplete" : "Complete";
+            $message = $entry->created_at->format('Y-m-d @ H:i') . ' | ';
+            $message .= "ID:{$entry->getId()} | ";
+            $message .= get_class($entry->getJob()) . ' | ';
+            $status = "Complete";
+            $method = "info";
+            if (is_null($entry->deleted_at)) {
+                $status = "Incomplete";
+                $method = "error";
+            }
             $status .= " ({$entry->attempts})";
             if ($entry->attempts == 0) {
                 $status = "Failed!";
+                $method = 'error';
             }
-            $class = get_class($entry->getJob());
-            $this->info("{$entry->created_at->format('Y-m-d@H:i')} | ID:{$entry->getId()} | {$class} | {$status}");
+            $message .= $status;
+            $this->$method($message);
         }
     }
 }
