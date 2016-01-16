@@ -10,8 +10,6 @@ Add to $aliases: `'QueueMgr' => NZTim\Queue\QueueMgrFacade::class,`
 `php artisan migrate` to run it and add the `queuemgrjobs` table
 
 Optional `.env` setting:  
-- `QUEUEMGR_MAX_AGE` the maximum age (in hours) before `queuemgr:check` reports an error, default is 1 hour
-- `QUEUEMGR_EMAIL` set this to your email address to receive an message when `queuemgr:check` reports an error
 - `QUEUEMGR_ATTEMPTS` sets the default number of attempts for a job, default is 5 times
 
 ###Usage
@@ -19,14 +17,17 @@ Optional `.env` setting:
 - Jobs must implement `NZTim\Queue\Job` interface, which consists solely of a `handle()` method.
 - `QueueMgr::add(new Job)` adds a `Job` to the queue
 - `php artisan queuemgr:process` runs all the jobs in the queue.  Job failures will be logged as warnings, and final failures as errors.  
-- `php artisan queuemgr:check` if this command finds jobs that exceed the specified age, it logs an error and optionally sends an email.
+- Queue processing is normally triggered via cron. 
+- A mutex is stored in the cache to allow only a single process to run.
+  - It is recommended to not use `withoutOverlapping()` because if for any reason it's file mutex is not cleared then execution will halt indefinitely.
+  - A warning will be logged if queue processing is skipped. This may indicate a lot of jobs or slow execution.
+  - If something goes wrong and the mutex is not cleared, it will time out after 60 minutes at which time normal processing will resume.
 - Completed jobs are soft-deleted initially and purged after 1 month.
 
 Typical Task Scheduler:
 
 ```
-$schedule->command('queuemgr:process')->everyMinute()->withoutOverlapping();
-$schedule->command('queuemgr:check')->hourly();
+$schedule->command('queuemgr:process')->everyMinute();
 ```
 
 Alternatively, set your cron to run `queuemgr:process` at your preferred interval.

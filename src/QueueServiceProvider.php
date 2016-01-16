@@ -1,6 +1,7 @@
 <?php namespace NZTim\Queue;
 
 use App;
+use Illuminate\Cache\Repository;
 use Illuminate\Mail\Mailer;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,9 +21,7 @@ class QueueServiceProvider extends ServiceProvider
     public function register()
     {
         App::bind('queuemgr', function() {
-            $repo = App::make(QueuedJob\QueuedJobRepository::class);
-            $mailer = App::make(Mailer::class);
-            return new QueueManager($repo, $mailer);
+            return App::make(QueueManager::class);
         });
         $this->commands($this->commands);
     }
