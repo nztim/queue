@@ -3,6 +3,7 @@
     "description": "Simple queue package for Laravel 5",
     "license": "MIT",
     "require": {
+        "php": ">=7.0.0",
         "laravel/framework": "5.1.*"
     },
     "autoload": {

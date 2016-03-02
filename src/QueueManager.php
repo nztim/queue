@@ -1,13 +1,13 @@
 <?php namespace NZTim\Queue;
 
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Cache\Repository;
 use Illuminate\Mail\Mailer;
 use Illuminate\Support\Collection;
 use Log;
 use NZTim\Queue\QueuedJob\QueuedJob;
 use NZTim\Queue\QueuedJob\QueuedJobRepository;
+use Throwable;
 
 class QueueManager
 {
@@ -54,13 +54,13 @@ class QueueManager
             try {
                 $item->getJob()->handle();
                 $this->queuedJobRepo->delete($item);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 $this->handleException($item, $e);
             }
         }
     }
 
-    protected function handleException(QueuedJob $item, Exception $e)
+    protected function handleException(QueuedJob $item, Throwable $e)
     {
         $class = (new \ReflectionClass($e))->getShortName();
         Log::warning("Exception executing job ID:{$item->getId()}: {$class} | {$e->getMessage()}");
