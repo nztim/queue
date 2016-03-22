@@ -36,3 +36,10 @@ Other commands:
 - `php artisan queuemgr:list [7]` lists all jobs within the specified number of days
 - `php artisan queuemgr:failed` lists all failed jobs
 - `php artisan queuemgr:clear` clears failed jobs from the queue
+
+### Changelog
+
+  * v4:
+    * `QueueMgr::check()` removed as is use of `withoutOverlapping()`
+    * `QUEUEMGR_EMAIL` and `QUEUEMGR_MAX_AGE` options removed
+    * To upgrade, just remove the unnecessary calls and .env options. Use your error handler (e.g. Logger) for email notifications of failures.
