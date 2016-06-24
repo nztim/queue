@@ -41,7 +41,6 @@ class QueueManager
             return;
         }
         $this->cache->put($cacheKey, true, 60);
-        $this->queuedJobRepo->purgeDeleted();
         $this->executeJobs();
         $this->cache->forget($cacheKey);
     }
@@ -49,6 +48,7 @@ class QueueManager
     protected function executeJobs()
     {
         try {
+            $this->queuedJobRepo->purgeDeleted();
             $queue = $this->queuedJobRepo->allOutstanding();
         } catch (Throwable $e) {
             Log::error("QueueMgr error accessing db: " . $e->getMessage());
