@@ -48,7 +48,12 @@ class QueueManager
 
     protected function executeJobs()
     {
-        $queue = $this->queuedJobRepo->allOutstanding();
+        try {
+            $queue = $this->queuedJobRepo->allOutstanding();
+        } catch (Throwable $e) {
+            Log::error("QueueMgr error accessing db: " . $e->getMessage());
+            return;
+        }
         foreach($queue as $item) {
             /** @var QueuedJob $item */
             try {
