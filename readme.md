@@ -24,6 +24,7 @@ Optional `.env` setting:
   - A warning will be logged if queue processing is skipped. This may indicate a lot of jobs or slow execution.
   - If something goes wrong and the mutex is not cleared, it will time out after 60 minutes at which time normal processing will resume.
 - Completed jobs are soft-deleted initially and purged after 1 month.
+- `php artisan queuemgr:pause 10` pauses the queue for the specified number of minutes or until the cache is cleared. Useful for deployments.
 
 Typical Task Scheduler:
 
@@ -31,15 +32,13 @@ Typical Task Scheduler:
 $schedule->command('queuemgr:daemon 50')->everyMinute();
 ```
 
-Alternatively, set your cron to run `queuemgr:process` at your preferred interval.
-
 Other commands:
 - `php artisan queuemgr:list [7]` lists all jobs within the specified number of days
 - `php artisan queuemgr:failed` lists all failed jobs
 - `php artisan queuemgr:clear` clears failed jobs from the queue
 
 ### Changelog
-  * v5: Add `miniDaemon()` method for faster processing. 
+  * v5: Add `miniDaemon()` method for faster processing. Add `pause()` for reliable deployments.
   * v4:
     * `QueueMgr::check()` removed as is use of `withoutOverlapping()`
     * `QUEUEMGR_EMAIL` and `QUEUEMGR_MAX_AGE` options removed

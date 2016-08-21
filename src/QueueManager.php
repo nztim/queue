@@ -117,4 +117,13 @@ class QueueManager
     {
         $this->queuedJobRepo->clearFailed();
     }
+
+    public function pause(int $minutes = 10) : bool
+    {
+        if($this->cache->has(static::$cacheKey)) {
+            return false;
+        }
+        $this->cache->put(static::$cacheKey, true, $minutes);
+        return true;
+    }
 }
