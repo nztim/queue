@@ -18,6 +18,7 @@ class ListJobs
             if ($entry->attempts == 0) {
                 $job['Status'] = "Failed!!!";
             }
+            $job['Deleted'] = $entry->deleted_at ? "Yes" : '';
             $jobs[] = $job;
         }
         return $jobs;
