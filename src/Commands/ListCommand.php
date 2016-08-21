@@ -1,6 +1,7 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
+use NZTim\Queue\QueuedJob\QueuedJob;
 use NZTim\Queue\QueueManager;
 
 class ListCommand extends Command
@@ -22,23 +23,23 @@ class ListCommand extends Command
     {
         $days = $this->argument('days');
         $entries = $this->queueManager->recent($days);
+        $jobs = [];
         foreach($entries as $entry) {
-            $message = $entry->created_at->format('Y-m-d @ H:i') . ' | ';
-            $message .= "ID:{$entry->getId()} | ";
-            $message .= get_class($entry->getJob()) . ' | ';
-            $status = "Complete";
-            $method = "info";
-            if (is_null($entry->deleted_at)) {
-                $status = "Incomplete";
-                $method = "error";
-            }
-            $status .= " ({$entry->attempts})";
+            /** @var QueuedJob $entry */
+            $job['Created'] = $entry->created_at->format('Y-m-d - H:i');
+            $job['ID'] =  "ID:{$entry->getId()}";
+            $job['Class'] = get_class($entry->getJob());
+            $job['Status'] = is_null($entry->deleted_at) ? "Incomplete" : "Complete";
+            $job['Status'] .= " ({$entry->attempts})";
             if ($entry->attempts == 0) {
-                $status = "Failed!";
-                $method = 'error';
+                $job['Status'] = "Failed!!!";
             }
-            $message .= $status;
-            $this->$method($message);
+            $jobs[] = $job;
+        }
+        if (count($jobs)) {
+            $this->table(array_keys($jobs[0]), $jobs);
+        } else {
+            $this->info('No jobs found');
         }
     }
 }
