@@ -38,7 +38,7 @@ Other commands:
 - `php artisan queuemgr:clear` clears failed jobs from the queue
 
 ### Changelog
-  * v5: Add `miniDaemon()` method for faster processing. Add `pause()` for reliable deployments.
+  * v5: Add `daemon()` method for faster processing. Add `pause()` for reliable deployments.
   * v4:
     * `QueueMgr::check()` removed as is use of `withoutOverlapping()`
     * `QUEUEMGR_EMAIL` and `QUEUEMGR_MAX_AGE` options removed
