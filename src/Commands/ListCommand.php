@@ -3,7 +3,7 @@
 use Illuminate\Console\Command;
 use NZTim\Queue\QueueManager;
 
-class QueuemgrListCommand extends Command
+class ListCommand extends Command
 {
     protected $signature = 'queuemgr:list {days=7}';
 

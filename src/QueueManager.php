@@ -1,8 +1,6 @@
 <?php namespace NZTim\Queue;
 
-use Carbon\Carbon;
 use Illuminate\Cache\Repository;
-use Illuminate\Mail\Mailer;
 use Illuminate\Support\Collection;
 use Log;
 use NZTim\Queue\QueuedJob\QueuedJob;

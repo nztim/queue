@@ -3,7 +3,7 @@
 use Illuminate\Console\Command;
 use QueueMgr;
 
-class QueuemgrClearFailedCommand extends Command
+class ClearFailedCommand extends Command
 {
     protected $name = 'queuemgr:clear';
 

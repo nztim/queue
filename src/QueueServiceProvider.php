@@ -11,11 +11,10 @@ class QueueServiceProvider extends ServiceProvider
 
     protected $commands = [
         Commands\AddMigrationCommand::class,
-        Commands\QueuemgrProcessCommand::class,
-        Commands\QueuemgrFailedCommand::class,
-        Commands\QueuemgrClearFailedCommand::class,
-        Commands\QueuemgrCheckCommand::class,
-        Commands\QueuemgrListCommand::class,
+        Commands\ProcessCommand::class,
+        Commands\FailedCommand::class,
+        Commands\ClearFailedCommand::class,
+        Commands\ListCommand::class,
     ];
 
     public function register()

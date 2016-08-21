@@ -3,7 +3,7 @@
 use Illuminate\Console\Command;
 use QueueMgr;
 
-class QueuemgrProcessCommand extends Command
+class ProcessCommand extends Command
 {
     protected $name = 'queuemgr:process';
 
