@@ -12,30 +12,20 @@ class ListCommand extends Command
 
     /** @var QueueManager */
     protected $queueManager;
+    protected $listJobs;
 
-    public function __construct(QueueManager $queueManager)
+    public function __construct(QueueManager $queueManager, ListJobs $listJobs)
     {
-        parent::__construct();
         $this->queueManager = $queueManager;
+        $this->listJobs = $listJobs;
+        parent::__construct();
     }
 
     public function handle()
     {
         $days = $this->argument('days');
         $entries = $this->queueManager->recent($days);
-        $jobs = [];
-        foreach($entries as $entry) {
-            /** @var QueuedJob $entry */
-            $job['Created'] = $entry->created_at->format('Y-m-d - H:i');
-            $job['ID'] =  "ID:{$entry->getId()}";
-            $job['Class'] = get_class($entry->getJob());
-            $job['Status'] = is_null($entry->deleted_at) ? "Incomplete" : "Complete";
-            $job['Status'] .= " ({$entry->attempts})";
-            if ($entry->attempts == 0) {
-                $job['Status'] = "Failed!!!";
-            }
-            $jobs[] = $job;
-        }
+        $jobs = $this->listJobs->table($entries);
         if (count($jobs)) {
             $this->table(array_keys($jobs[0]), $jobs);
         } else {
