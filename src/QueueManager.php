@@ -49,7 +49,7 @@ class QueueManager
             $this->queuedJobRepo->purgeDeleted();
             $queue = $this->queuedJobRepo->allOutstanding();
         } catch (Throwable $e) {
-            Log::error("QueueMgr error accessing db: " . $e->getMessage());
+            Log::error("QueueMgr error accessing database: " . $e->getMessage());
             return;
         }
         foreach($queue as $item) {

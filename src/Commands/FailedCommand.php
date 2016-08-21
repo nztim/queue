@@ -1,7 +1,6 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use NZTim\Queue\QueuedJob\QueuedJob;
 use QueueMgr;
 
 class FailedCommand extends Command

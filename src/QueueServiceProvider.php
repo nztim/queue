@@ -1,8 +1,6 @@
 <?php namespace NZTim\Queue;
 
 use App;
-use Illuminate\Cache\Repository;
-use Illuminate\Mail\Mailer;
 use Illuminate\Support\ServiceProvider;
 
 class QueueServiceProvider extends ServiceProvider

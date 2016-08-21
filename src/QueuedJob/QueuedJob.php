@@ -2,9 +2,10 @@
 
 use BadMethodCallException;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use NZTim\Queue\Job;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use NZTim\Queue\Job;
 
 class QueuedJob extends Model
 {
@@ -16,32 +17,35 @@ class QueuedJob extends Model
     /*
      * Completed jobs are soft-deleted and purged after 1 month
      * Outstanding jobs are not deleted
-     * If attempts = 0 then they will not be tried again
+     * Jobs with 0 attempts remaining will not be retried
      */
 
     public function scopeOutstanding($query)
     {
+        /** @var Builder $query */
         return $query->where('attempts', '>', 0);
     }
 
     public function scopeDeletedAndOld($query)
     {
+        /** @var Builder $query */
         return $query->onlyTrashed()->where('deleted_at', '<', Carbon::now()->subMonth());
     }
 
     public function scopeAllFailed($query)
     {
+        /** @var Builder $query */
         return $query->where('attempts', '=', 0);
     }
 
     // Entity =================================================================
 
-    public function getId()
+    public function getId() : int
     {
         return $this->id;
     }
 
-    public function getJob()
+    public function getJob() : Job
     {
         return unserialize($this->job);
     }
@@ -54,7 +58,7 @@ class QueuedJob extends Model
         }
     }
 
-    public function failed()
+    public function failed() : bool
     {
         return $this->attempts == 0 ? true : false;
     }
