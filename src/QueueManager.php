@@ -13,6 +13,9 @@ class QueueManager
     protected $cache;
     protected $queuedJobRepo;
     protected $mutexHandler;
+    protected static $cacheKey = 'nztim-queuemgr-lock';
+    protected static $errorTimeoutMinutes = 30;
+    protected static $secondsBetweenAttempts = 10;
 
     public function __construct(QueuedJobRepository $queuedJobRepo, Repository $cache)
     {
@@ -33,14 +36,35 @@ class QueueManager
 
     public function process()
     {
-        $cacheKey = 'nztim-queuemgr-lock';
-        if($this->cache->has($cacheKey)) {
+        if($this->cache->has(static::$cacheKey)) {
             Log::warning("QueueMgr triggered but process already running");
             return;
         }
-        $this->cache->put($cacheKey, true, 60);
+        $this->cache->put(static::$cacheKey, true, 60);
         $this->executeJobs();
-        $this->cache->forget($cacheKey);
+        $this->cache->forget(static::$cacheKey);
+    }
+
+    /**
+     * @param int $runtimeSeconds in seconds
+     */
+    public function daemon(int $runtimeSeconds = 0)
+    {
+        if($this->cache->has(static::$cacheKey)) {
+            Log::warning("QueueMgr triggered but process already running");
+            return;
+        }
+        $timeoutMinutes = intval($runtimeSeconds / 60) + static::$errorTimeoutMinutes;
+        $this->cache->put(static::$cacheKey, true, $timeoutMinutes);
+        $start = time();
+        while (true) {
+            $this->executeJobs();
+            if ((time() - $start) >= $runtimeSeconds) {
+                break;
+            }
+            sleep(static::$secondsBetweenAttempts);
+        }
+        $this->cache->forget(static::$cacheKey);
     }
 
     protected function executeJobs()

@@ -13,6 +13,7 @@ class QueueServiceProvider extends ServiceProvider
         Commands\FailedCommand::class,
         Commands\ClearFailedCommand::class,
         Commands\ListCommand::class,
+        Commands\Daemon::class,
     ];
 
     public function register()

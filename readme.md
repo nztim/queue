@@ -16,7 +16,8 @@ Optional `.env` setting:
 
 - Jobs must implement `NZTim\Queue\Job` interface, which consists solely of a `handle()` method.
 - `QueueMgr::add(new Job)` adds a `Job` to the queue
-- `php artisan queuemgr:process` runs all the jobs in the queue.  Job failures will be logged as warnings, and final failures as errors.  
+- `php artisan queuemgr:process` runs all the jobs in the queue.  Job failures will be logged as warnings, and final failures as errors.
+- `php artisan queuemgr:daemon 50` processes the queue repeatedly for at least as long as the period specified (seconds). 
 - Queue processing is normally triggered via cron. 
 - A mutex is stored in the cache to allow only a single process to run.
   - It is recommended to not use `withoutOverlapping()` because if for any reason it's file mutex is not cleared then execution will halt indefinitely.
@@ -27,7 +28,7 @@ Optional `.env` setting:
 Typical Task Scheduler:
 
 ```
-$schedule->command('queuemgr:process')->everyMinute();
+$schedule->command('queuemgr:daemon 50')->everyMinute();
 ```
 
 Alternatively, set your cron to run `queuemgr:process` at your preferred interval.
@@ -38,7 +39,7 @@ Other commands:
 - `php artisan queuemgr:clear` clears failed jobs from the queue
 
 ### Changelog
-
+  * v5: Add `miniDaemon()` method for faster processing. 
   * v4:
     * `QueueMgr::check()` removed as is use of `withoutOverlapping()`
     * `QUEUEMGR_EMAIL` and `QUEUEMGR_MAX_AGE` options removed
