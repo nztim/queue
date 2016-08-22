@@ -25,11 +25,13 @@ Optional `.env` setting:
   - If something goes wrong and the mutex is not cleared, it will time out after 60 minutes at which time normal processing will resume.
 - Completed jobs are soft-deleted initially and purged after 1 month.
 - `php artisan queuemgr:pause 10` pauses the queue for the specified number of minutes or until the cache is cleared. Useful for deployments.
+- `php artisan queuemgr:logstatus` logs queue statistics for the last 24 hours
 
 Typical Task Scheduler:
 
 ```
 $schedule->command('queuemgr:daemon 50')->everyMinute();
+$schedule->command('queuemgr:logstatus')->daily();
 ```
 
 Other commands:

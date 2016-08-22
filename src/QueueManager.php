@@ -126,4 +126,22 @@ class QueueManager
         $this->cache->put(static::$cacheKey, true, $minutes);
         return true;
     }
+
+    public function status(int $hours = 24) : string
+    {
+        $outstanding = $this->queuedJobRepo->allOutstanding()->count();
+        $failed = $this->queuedJobRepo->allFailed()->count();
+        $completed = $this->queuedJobRepo->completed($hours);
+        $completedCount = $completed->count();
+        $totalTime = $completed->reduce(function($total, QueuedJob $job) {
+            return $total + $job->processingTime();
+        }, 0);
+        $avgTime = $completedCount ? number_format($totalTime / $completedCount, 1) : 0;
+        return "QueueMgr: {$outstanding} outstanding, {$failed} failed, {$completedCount} completed in avg {$avgTime} seconds ({$hours} hours)";
+    }
+
+    public function logStatus(int $hours = 24)
+    {
+        Log::info($this->status($hours));
+    }
 }

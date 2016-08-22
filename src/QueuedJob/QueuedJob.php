@@ -62,4 +62,12 @@ class QueuedJob extends Model
     {
         return $this->attempts == 0 ? true : false;
     }
+
+    public function processingTime() : int
+    {
+        if (is_null($this->deleted_at)) {
+            return 0;
+        }
+        return $this->deleted_at->diffInSeconds($this->created_at);
+    }
 }

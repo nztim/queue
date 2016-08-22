@@ -33,6 +33,11 @@ class QueuedJobRepository
             ->orderBy('created_at', 'asc')->get();
     }
 
+    public function completed(int $hours) : Collection
+    {
+        return $this->model->onlyTrashed()->where('created_at', '>', Carbon::now()->subHours($hours))->get();
+    }
+
     public function allOutstanding() : Collection
     {
         return $this->model->outstanding()->get();
