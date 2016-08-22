@@ -17,21 +17,21 @@ Optional `.env` setting:
 - Jobs must implement `NZTim\Queue\Job` interface, which consists solely of a `handle()` method.
 - `QueueMgr::add(new Job)` adds a `Job` to the queue
 - `php artisan queuemgr:process` runs all the jobs in the queue.  Job failures will be logged as warnings, and final failures as errors.
-- `php artisan queuemgr:daemon 50` processes the queue repeatedly for at least as long as the period specified (seconds). 
+- `php artisan queuemgr:daemon` processes the queue repeatedly for at least as long as the period specified (seconds). 
 - Queue processing is normally triggered via cron. 
 - A mutex is stored in the cache to allow only a single process to run.
   - It is recommended to not use `withoutOverlapping()` because if for any reason it's file mutex is not cleared then execution will halt indefinitely.
   - A warning will be logged if queue processing is skipped. This may indicate a lot of jobs or slow execution.
-  - If something goes wrong and the mutex is not cleared, it will time out after 60 minutes at which time normal processing will resume.
+  - If something goes wrong and the mutex is not cleared, it will time out after 30 minutes at which time normal processing will resume.
 - Completed jobs are soft-deleted initially and purged after 1 month.
 - `php artisan queuemgr:pause 10` pauses the queue for the specified number of minutes or until the cache is cleared. Useful for deployments.
 - `php artisan queuemgr:logstatus` logs queue statistics for the last 24 hours
 
-Typical Task Scheduler:
+Example Task Scheduler:
 
 ```
 $schedule->command('queuemgr:daemon 50')->everyMinute();
-$schedule->command('queuemgr:logstatus')->daily();
+$schedule->command('queuemgr:logstatus')->dailyAt('4:00');
 ```
 
 Other commands:

@@ -40,7 +40,7 @@ class QueueManager
             Log::warning("QueueMgr triggered but process already running");
             return;
         }
-        $this->cache->put(static::$cacheKey, true, 60);
+        $this->cache->put(static::$cacheKey, true, static::$errorTimeoutMinutes);
         $this->executeJobs();
         $this->cache->forget(static::$cacheKey);
     }
