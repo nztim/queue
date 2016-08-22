@@ -137,7 +137,7 @@ class QueueManager
             return $total + $job->processingTime();
         }, 0);
         $avgTime = $completedCount ? number_format($totalTime / $completedCount, 1) : 0;
-        return "QueueMgr: {$outstanding} outstanding, {$failed} failed, {$completedCount} completed in avg {$avgTime} seconds ({$hours} hours)";
+        return "QueueMgr: {$outstanding} outstanding, {$failed} failed, {$completedCount} completed, avg {$avgTime} seconds/job (last {$hours} hours)";
     }
 
     public function logStatus(int $hours = 24)
