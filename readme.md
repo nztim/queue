@@ -41,7 +41,7 @@ Other commands:
 
 ### Changelog
   * v5: Add `daemon()` method for faster processing. Add `pause()` for reliable deployments.
-    * To upgrade: replace use `daemon` via cron instead of `process`, add daily `logstatus` cron, update deployment process to use `pause 10`
+    * To upgrade: replace use `daemon` via cron instead of `process`, add daily `logstatus` cron, update deployment process to use `pause 10` followed by cache clear on completion
   * v4:
     * `QueueMgr::check()` removed as is use of `withoutOverlapping()`
     * `QUEUEMGR_EMAIL` and `QUEUEMGR_MAX_AGE` options removed
