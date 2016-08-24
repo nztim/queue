@@ -35,6 +35,7 @@ $schedule->command('queuemgr:logstatus')->dailyAt('4:00');
 ```
 
 Other commands:
+- `php artisan queuemgr:status [24]` displays the queue status over the specified period (default 24 hours)
 - `php artisan queuemgr:list [7]` lists all jobs within the specified number of days
 - `php artisan queuemgr:failed` lists all failed jobs
 - `php artisan queuemgr:clear` clears failed jobs from the queue
