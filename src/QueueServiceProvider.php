@@ -15,6 +15,7 @@ class QueueServiceProvider extends ServiceProvider
         Commands\ListCommand::class,
         Commands\Daemon::class,
         Commands\Pause::class,
+        Commands\Resume::class,
         Commands\LogStatus::class,
         Commands\Status::class,
     ];

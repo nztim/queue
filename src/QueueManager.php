@@ -1,6 +1,5 @@
 <?php namespace NZTim\Queue;
 
-use Illuminate\Cache\Repository;
 use Illuminate\Support\Collection;
 use Log;
 use NZTim\Queue\QueuedJob\QueuedJob;
@@ -10,21 +9,17 @@ use Throwable;
 class QueueManager
 {
     protected $attempts;
-    protected $cache;
+    protected $lock;
     protected $queuedJobRepo;
-    protected $mutexHandler;
-    protected static $cacheKey = 'nztim-queuemgr-lock';
-    protected static $errorTimeoutMinutes = 30;
+    protected static $errorTimeoutMinutes = 20;
     protected static $secondsBetweenAttempts = 10;
 
-    public function __construct(QueuedJobRepository $queuedJobRepo, Repository $cache)
+    public function __construct(QueuedJobRepository $queuedJobRepo, Lock $lock)
     {
         $this->attempts = env('QUEUEMGR_ATTEMPTS', 5);
         $this->queuedJobRepo = $queuedJobRepo;
-        $this->cache = $cache;
+        $this->lock = $lock;
     }
-
-    // Facade commands --------------------------------------------------------
 
     public function add(Job $job)
     {
@@ -32,17 +27,14 @@ class QueueManager
         $this->queuedJobRepo->persist($job);
     }
 
-    // Console commands -------------------------------------------------------
-
     public function process()
     {
-        if($this->cache->has(static::$cacheKey)) {
-            Log::warning("QueueMgr triggered but process already running");
+        if (!$this->lock->set(static::$errorTimeoutMinutes)) {
+            info('QueueMgr triggered but process already running');
             return;
         }
-        $this->cache->put(static::$cacheKey, true, static::$errorTimeoutMinutes);
         $this->executeJobs();
-        $this->cache->forget(static::$cacheKey);
+        $this->lock->clear();
     }
 
     /**
@@ -50,21 +42,17 @@ class QueueManager
      */
     public function daemon(int $runtimeSeconds = 0)
     {
-        if($this->cache->has(static::$cacheKey)) {
-            Log::warning("QueueMgr triggered but process already running");
+        $timeoutMinutes = intval(ceil($runtimeSeconds / 60)) + static::$errorTimeoutMinutes;
+        if (!$this->lock->set($timeoutMinutes)) {
+            info('QueueMgr triggered but process already running');
             return;
         }
-        $timeoutMinutes = intval($runtimeSeconds / 60) + static::$errorTimeoutMinutes;
-        $this->cache->put(static::$cacheKey, true, $timeoutMinutes);
         $start = time();
-        while (true) {
+        while ((time() - $start) < $runtimeSeconds) {
             $this->executeJobs();
-            if ((time() - $start) >= $runtimeSeconds) {
-                break;
-            }
             sleep(static::$secondsBetweenAttempts);
         }
-        $this->cache->forget(static::$cacheKey);
+        $this->lock->clear();
     }
 
     protected function executeJobs()
@@ -120,11 +108,12 @@ class QueueManager
 
     public function pause(int $minutes = 10) : bool
     {
-        if($this->cache->has(static::$cacheKey)) {
-            return false;
-        }
-        $this->cache->put(static::$cacheKey, true, $minutes);
-        return true;
+        return $this->lock->pause($minutes);
+    }
+
+    public function resume() : bool
+    {
+        return $this->lock->resume();
     }
 
     public function status(int $hours = 24) : string

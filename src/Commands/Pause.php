@@ -6,7 +6,7 @@ use QueueMgr;
 class Pause extends Command
 {
     protected $signature = 'queuemgr:pause {minutes=10}';
-    protected $description = 'Pauses queue processing for period specified (or cache is cleared)';
+    protected $description = 'Pauses queue processing for period specified';
 
     public function handle()
     {
@@ -18,6 +18,6 @@ class Pause extends Command
                 sleep(2);
             }
         }
-        $this->info('Queue processing is now paused for ' . $minutes . ' minutes (or until cache is cleared)');
+        $this->info('Queue processing is now paused for ' . $minutes . ' minutes');
     }
 }
