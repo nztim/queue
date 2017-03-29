@@ -9,8 +9,9 @@ Add to $aliases: `'QueueMgr' => NZTim\Queue\QueueMgrFacade::class,`
 `php artisan queuemgr:migration` to add migration file
 `php artisan migrate` to run it and add the `queuemgrjobs` table
 
-Optional `.env` setting:  
+Optional `.env` settings:  
 - `QUEUEMGR_ATTEMPTS` sets the default number of attempts for a job, default is 5 times
+- `QUEUEMGR_TIMEOUT` sets the number of minutes before automatic timeout, default is 20
 
 ###Usage
 

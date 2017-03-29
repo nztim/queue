@@ -11,11 +11,12 @@ class QueueManager
     protected $attempts;
     protected $lock;
     protected $queuedJobRepo;
-    protected static $errorTimeoutMinutes = 20;
-    protected static $secondsBetweenAttempts = 10;
+    protected $errorTimeoutMinutes;
+    protected $secondsBetweenAttempts = 10;
 
     public function __construct(QueuedJobRepository $queuedJobRepo, Lock $lock)
     {
+        $this->errorTimeoutMinutes = env('QUEUEMGR_TIMEOUT', 20);
         $this->attempts = env('QUEUEMGR_ATTEMPTS', 5);
         $this->queuedJobRepo = $queuedJobRepo;
         $this->lock = $lock;
@@ -29,7 +30,7 @@ class QueueManager
 
     public function process()
     {
-        if (!$this->lock->set(static::$errorTimeoutMinutes)) {
+        if (!$this->lock->set($this->errorTimeoutMinutes)) {
             info('QueueMgr triggered but process already running');
             return;
         }
@@ -42,7 +43,7 @@ class QueueManager
      */
     public function daemon(int $runtimeSeconds = 0)
     {
-        $timeoutMinutes = intval(ceil($runtimeSeconds / 60)) + static::$errorTimeoutMinutes;
+        $timeoutMinutes = intval(ceil($runtimeSeconds / 60)) + $this->errorTimeoutMinutes;
         if (!$this->lock->set($timeoutMinutes)) {
             info('QueueMgr triggered but process already running');
             return;
@@ -50,7 +51,7 @@ class QueueManager
         $start = time();
         while ((time() - $start) < $runtimeSeconds) {
             $this->executeJobs();
-            sleep(static::$secondsBetweenAttempts);
+            sleep($this->secondsBetweenAttempts);
         }
         $this->lock->clear();
     }
