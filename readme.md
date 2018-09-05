@@ -29,7 +29,6 @@ Optional `.env` settings:
 - `php artisan queuemgr:resume` resumes paused queue processing if paused.
   - Typically surround your deployments with `pause` and `resume`
 - `php artisan queuemgr:logstatus` logs queue statistics for the last 24 hours
-- `php artisan queuemgr:dump {id}` dumps contents of a particular job id
 
 Example Task Scheduler:
 
@@ -42,6 +41,7 @@ Other commands:
 - `php artisan queuemgr:status [24]` displays the queue status over the specified period (default 24 hours)
 - `php artisan queuemgr:list [7]` lists all jobs within the specified number of days
 - `php artisan queuemgr:failed` lists all failed jobs
+- `php artisan queuemgr:dump {id}` dumps contents of a particular job id
 - `php artisan queuemgr:clear` clears failed jobs from the queue
 
 ### Changelog
