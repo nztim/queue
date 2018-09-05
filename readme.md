@@ -2,14 +2,14 @@
 
 Simple job queue package for Laravel 5
 
-Install via `config/app.php`:  
-Add to $providers: `NZTim\Queue\QueueServiceProvider::class,`  
-Add to $aliases: `'QueueMgr' => NZTim\Queue\QueueMgrFacade::class,`  
+Install via `config/app.php`:
+Add to $providers: `NZTim\Queue\QueueServiceProvider::class,`
+Add to $aliases: `'QueueMgr' => NZTim\Queue\QueueMgrFacade::class,`
 
 `php artisan queuemgr:migration` to add migration file
 `php artisan migrate` to run it and add the `queuemgrjobs` table
 
-Optional `.env` settings:  
+Optional `.env` settings:
 - `QUEUEMGR_ATTEMPTS` sets the default number of attempts for a job, default is 5 times
 - `QUEUEMGR_TIMEOUT` sets the number of minutes before automatic timeout, default is 20
 
@@ -18,8 +18,8 @@ Optional `.env` settings:
 - Jobs must implement `NZTim\Queue\Job` interface, which consists solely of a `handle()` method.
 - `QueueMgr::add(new Job)` adds a `Job` to the queue
 - `php artisan queuemgr:process` runs all the jobs in the queue.  Job failures will be logged as warnings, and final failures as errors.
-- `php artisan queuemgr:daemon` processes the queue repeatedly for at least as long as the period specified (seconds). 
-- Queue processing is normally triggered via cron. 
+- `php artisan queuemgr:daemon` processes the queue repeatedly for at least as long as the period specified (seconds).
+- Queue processing is normally triggered via cron.
 - A lockfile is created in the storage folder to allow only only a single process to run.
   - It is recommended to not use `withoutOverlapping()` because if for any reason it's file mutex is not cleared then execution will halt indefinitely.
   - A warning will be logged if queue processing is skipped. This may indicate a lot of jobs or slow execution.
@@ -29,6 +29,7 @@ Optional `.env` settings:
 - `php artisan queuemgr:resume` resumes paused queue processing if paused.
   - Typically surround your deployments with `pause` and `resume`
 - `php artisan queuemgr:logstatus` logs queue statistics for the last 24 hours
+- `php artisan queuemgr:dump {id}` dumps contents of a particular job id
 
 Example Task Scheduler:
 
