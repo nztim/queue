@@ -5,8 +5,6 @@ use Illuminate\Support\ServiceProvider;
 
 class QueueServiceProvider extends ServiceProvider
 {
-    protected $defer = false;
-
     protected $commands = [
         Commands\AddMigrationCommand::class,
         Commands\ProcessCommand::class,
