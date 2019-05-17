@@ -17,6 +17,7 @@ class QueueServiceProvider extends ServiceProvider
         Commands\LogStatus::class,
         Commands\Status::class,
         Commands\Dump::class,
+        Commands\Retry::class,
     ];
 
     public function register()

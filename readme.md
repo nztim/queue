@@ -42,14 +42,16 @@ Other commands:
 - `php artisan queuemgr:list [7]` lists all jobs within the specified number of days
 - `php artisan queuemgr:failed` lists all failed jobs
 - `php artisan queuemgr:dump {id}` dumps contents of a particular job id
+- `php artisan queuemgr:retry {id}` retry failed job one more time
 - `php artisan queuemgr:clear` clears failed jobs from the queue
 
 ### Changelog
-  * v6: Replace cache lock with lockfile. Add `resume()` method.
+  * 6.4: Add retry command
+  * 6: Replace cache lock with lockfile. Add `resume()` method.
     * To upgrade: add `resume` to deployment scripts after deployment is complete.
-  * v5: Add `daemon()` method for faster processing. Add `pause()` for reliable deployments.
+  * 5: Add `daemon()` method for faster processing. Add `pause()` for reliable deployments.
     * To upgrade: replace use `daemon` via cron instead of `process`, add daily `logstatus` cron, update deployment process to use `pause 10` followed by cache clear on completion
-  * v4:
+  * 4:
     * `QueueMgr::check()` removed as is use of `withoutOverlapping()`
     * `QUEUEMGR_EMAIL` and `QUEUEMGR_MAX_AGE` options removed
     * To upgrade, just remove the unnecessary calls and .env options. Use your error handler (e.g. Logger) for email notifications of failures.
