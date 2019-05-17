@@ -9,7 +9,10 @@
         "phpunit/phpunit": "~4.0"
     },
     "autoload": {
-      "psr-4": {"NZTim\\Queue\\": "src/"}
+      "psr-4": {"NZTim\\Queue\\": "src/"},
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "authors": [
         {

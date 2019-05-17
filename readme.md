@@ -16,7 +16,7 @@ Optional `.env` settings:
 ###Usage
 
 - Jobs must implement `NZTim\Queue\Job` interface, which consists solely of a `handle()` method.
-- `QueueMgr::add(new Job)` adds a `Job` to the queue
+- `QueueMgr::add(new Job)` adds a `Job` to the queue, or use helper function: `qa(new Job)`
 - `php artisan queuemgr:process` runs all the jobs in the queue.  Job failures will be logged as warnings, and final failures as errors.
 - `php artisan queuemgr:daemon` processes the queue repeatedly for at least as long as the period specified (seconds).
 - Queue processing is normally triggered via cron.
