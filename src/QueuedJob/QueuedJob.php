@@ -20,32 +20,29 @@ class QueuedJob extends Model
      * Jobs with 0 attempts remaining will not be retried
      */
 
-    public function scopeOutstanding($query)
+    public function scopeOutstanding(Builder $query)
     {
-        /** @var Builder $query */
         return $query->where('attempts', '>', 0);
     }
 
-    public function scopeDeletedAndOld($query)
+    public function scopeDeletedAndOld(Builder $query)
     {
-        /** @var Builder $query */
         return $query->onlyTrashed()->where('deleted_at', '<', Carbon::now()->subMonth());
     }
 
-    public function scopeAllFailed($query)
+    public function scopeAllFailed(Builder $query)
     {
-        /** @var Builder $query */
-        return $query->where('attempts', '=', 0);
+        return $query->where('attempts', 0);
     }
 
     // Entity =================================================================
 
-    public function getId() : int
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getJob() : Job
+    public function getJob()
     {
         return unserialize($this->job);
     }
@@ -53,17 +50,17 @@ class QueuedJob extends Model
     public function decrementAttempts()
     {
         $this->attempts--;
-        if($this->attempts < 0 ) {
+        if ($this->attempts < 0) {
             throw new BadMethodCallException('Cannot decrement attempts lower than 0');
         }
     }
 
-    public function failed() : bool
+    public function failed(): bool
     {
         return $this->attempts == 0 ? true : false;
     }
 
-    public function processingTime() : int
+    public function processingTime(): int
     {
         if (is_null($this->deleted_at)) {
             return 0;

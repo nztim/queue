@@ -1,7 +1,7 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use QueueMgr;
+use NZTim\Queue\QueueManager;
 
 class Status extends Command
 {
@@ -11,6 +11,6 @@ class Status extends Command
     public function handle()
     {
         $hours = intval($this->argument('hours'));
-        $this->info(QueueMgr::status($hours));
+        $this->info(app(QueueManager::class)->status($hours));
     }
 }

@@ -1,7 +1,7 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use QueueMgr;
+use NZTim\Queue\QueueManager;
 
 class ProcessCommand extends Command
 {
@@ -11,6 +11,6 @@ class ProcessCommand extends Command
 
     public function handle()
     {
-        QueueMgr::process();
+        app(QueueManager::class)->process();
     }
 }

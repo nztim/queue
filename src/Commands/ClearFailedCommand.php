@@ -1,7 +1,7 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use QueueMgr;
+use NZTim\Queue\QueueManager;
 
 class ClearFailedCommand extends Command
 {
@@ -11,7 +11,7 @@ class ClearFailedCommand extends Command
 
     public function handle()
     {
-        QueueMgr::clearFailed();
+        app(QueueManager::class)->clearFailed();
         $this->info('All failed jobs cleared');
     }
 }

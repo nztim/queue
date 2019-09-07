@@ -1,7 +1,7 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use QueueMgr;
+use NZTim\Queue\QueueManager;
 
 class Daemon extends Command
 {
@@ -11,6 +11,6 @@ class Daemon extends Command
     public function handle()
     {
         $seconds = intval($this->argument('seconds'));
-        QueueMgr::daemon($seconds);
+        app(QueueManager::class)->daemon($seconds);
     }
 }

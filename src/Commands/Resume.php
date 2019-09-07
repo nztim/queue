@@ -1,7 +1,7 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use QueueMgr;
+use NZTim\Queue\QueueManager;
 
 class Resume extends Command
 {
@@ -10,7 +10,7 @@ class Resume extends Command
 
     public function handle()
     {
-        if (!QueueMgr::resume()) {
+        if (!app(QueueManager::class)->resume()) {
             $this->info('Queue processing was not paused - no action taken');
             return 1;
         }

@@ -1,7 +1,7 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use QueueMgr;
+use NZTim\Queue\QueueManager;
 
 class Pause extends Command
 {
@@ -11,9 +11,9 @@ class Pause extends Command
     public function handle()
     {
         $minutes = intval($this->argument('minutes'));
-        if (!QueueMgr::pause($minutes)) {
+        if (!app(QueueManager::class)->pause($minutes)) {
             $this->info('Currently executing, waiting for jobs to finish.');
-            while (!QueueMgr::pause($minutes)) {
+            while (!app(QueueManager::class)->pause($minutes)) {
                 $this->output->write('<info>.</info>');
                 sleep(2);
             }

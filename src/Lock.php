@@ -9,7 +9,7 @@ class Lock
     public function __construct(string $lockfile = null)
     {
         if (is_null($lockfile)) {
-            $lockfile = storage_path('app'.DIRECTORY_SEPARATOR.'nztqueuemgr.lock');
+            $lockfile = storage_path('app' . DIRECTORY_SEPARATOR . 'nztqueuemgr.lock');
         }
         $this->lockfile = $lockfile;
     }
@@ -19,7 +19,7 @@ class Lock
      * @param int $timeoutMinutes
      * @return bool
      */
-    public function set(int $timeoutMinutes) : bool
+    public function set(int $timeoutMinutes): bool
     {
         if ($this->isLocked()) {
             return false;
@@ -33,7 +33,7 @@ class Lock
         file_put_contents($this->lockfile, "0");
     }
 
-    public function pause(int $timeoutMinutes) : bool
+    public function pause(int $timeoutMinutes): bool
     {
         if ($this->isLocked()) {
             return false;
@@ -42,7 +42,7 @@ class Lock
         return true;
     }
 
-    public function resume() : bool
+    public function resume(): bool
     {
         if (!$this->isPaused()) {
             return false;
@@ -51,13 +51,13 @@ class Lock
         return true;
     }
 
-    protected function isPaused() : bool
+    protected function isPaused(): bool
     {
         return $this->status() == static::STATUS_PAUSED;
     }
 
     // Locked = executing or paused
-    protected function isLocked() : bool
+    protected function isLocked(): bool
     {
         return $this->status() ? true : false;
     }

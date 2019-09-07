@@ -6,60 +6,53 @@ use NZTim\Queue\Job;
 
 class QueuedJobRepository
 {
-    protected $model;
-
-    public function __construct(QueuedJob $model)
+    public function newInstance(Job $job, int $attempts): QueuedJob
     {
-        $this->model = $model;
-    }
-
-    public function newInstance(Job $job, int $attempts) : QueuedJob
-    {
-        $queuedJob = $this->model->newInstance();
+        $queuedJob = (new QueuedJob())->newInstance();
         $queuedJob->job = serialize($job);
         $queuedJob->attempts = (int) $attempts;
         return $queuedJob;
     }
 
-    public function persist(QueuedJob $job)
+    public function persist(QueuedJob $job): void
     {
         $job->save();
     }
 
-    public function recent(int $days) : Collection
+    public function recent(int $days): Collection
     {
-        return $this->model->withTrashed()
+        return (new QueuedJob())->withTrashed()
             ->where('created_at', '>', Carbon::now()->subDays($days))
             ->orderBy('created_at', 'asc')->get();
     }
 
-    public function completed(int $hours) : Collection
+    public function completed(int $hours): Collection
     {
-        return $this->model->onlyTrashed()->where('created_at', '>', Carbon::now()->subHours($hours))->get();
+        return (new QueuedJob())->onlyTrashed()->where('created_at', '>', Carbon::now()->subHours($hours))->get();
     }
 
-    public function allOutstanding() : Collection
+    public function allOutstanding(): Collection
     {
-        return $this->model->outstanding()->get();
+        return (new QueuedJob())->outstanding()->get();
     }
 
-    public function allFailed() : Collection
+    public function allFailed(): Collection
     {
-        return $this->model->allFailed()->get();
+        return (new QueuedJob())->allFailed()->get();
     }
 
-    public function purgeDeleted()
+    public function purgeDeleted(): void
     {
-        $this->model->deletedAndOld()->forceDelete();
+        (new QueuedJob())->deletedAndOld()->forceDelete();
     }
 
-    public function delete(QueuedJob $job)
+    public function delete(QueuedJob $job): void
     {
         $job->delete();
     }
 
-    public function clearFailed()
+    public function clearFailed(): void
     {
-        $this->model->allFailed()->delete();
+        (new QueuedJob())->allFailed()->delete();
     }
 }

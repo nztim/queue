@@ -1,7 +1,7 @@
 <?php namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use QueueMgr;
+use NZTim\Queue\QueueManager;
 
 class FailedCommand extends Command
 {
@@ -17,7 +17,7 @@ class FailedCommand extends Command
 
     public function handle()
     {
-        $entries = QueueMgr::allFailed();
+        $entries = app(QueueManager::class)->allFailed();
         $jobs = $this->listJobs->table($entries);
         if (count($jobs)) {
             $this->table(array_keys($jobs[0]), $jobs);

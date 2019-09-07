@@ -1,28 +1,28 @@
 <?php namespace NZTim\Queue;
 
 use Illuminate\Support\Collection;
-use Log;
+use Illuminate\Support\Facades\Log;
 use NZTim\Queue\QueuedJob\QueuedJob;
 use NZTim\Queue\QueuedJob\QueuedJobRepository;
 use Throwable;
 
 class QueueManager
 {
-    protected $attempts;
-    protected $lock;
-    protected $queuedJobRepo;
-    protected $errorTimeoutMinutes;
-    protected $secondsBetweenAttempts = 10;
+    private $attempts;
+    private $lock;
+    private $queuedJobRepo;
+    private $timeoutMinutes;
+    private $secondsBetweenAttempts = 10;
 
-    public function __construct(QueuedJobRepository $queuedJobRepo, Lock $lock)
+    public function __construct(QueuedJobRepository $queuedJobRepo, Lock $lock, int $timeoutMinutes = 20, int $attempts = 5)
     {
-        $this->errorTimeoutMinutes = env('QUEUEMGR_TIMEOUT', 20);
-        $this->attempts = env('QUEUEMGR_ATTEMPTS', 5);
+        $this->timeoutMinutes = $timeoutMinutes;
+        $this->attempts = $attempts;
         $this->queuedJobRepo = $queuedJobRepo;
         $this->lock = $lock;
     }
 
-    public function add(Job $job)
+    public function add(Job $job): void
     {
         $job = $this->queuedJobRepo->newInstance($job, $this->attempts);
         $this->queuedJobRepo->persist($job);
@@ -30,7 +30,7 @@ class QueueManager
 
     public function process()
     {
-        if (!$this->lock->set($this->errorTimeoutMinutes)) {
+        if (!$this->lock->set($this->timeoutMinutes)) {
             info('QueueMgr triggered but process already running');
             return;
         }
@@ -38,12 +38,9 @@ class QueueManager
         $this->lock->clear();
     }
 
-    /**
-     * @param int $runtimeSeconds in seconds
-     */
     public function daemon(int $runtimeSeconds = 0)
     {
-        $timeoutMinutes = intval(ceil($runtimeSeconds / 60)) + $this->errorTimeoutMinutes;
+        $timeoutMinutes = intval(ceil($runtimeSeconds / 60)) + $this->timeoutMinutes;
         if (!$this->lock->set($timeoutMinutes)) {
             info('QueueMgr triggered but process already running');
             return;
@@ -65,7 +62,7 @@ class QueueManager
             Log::error("QueueMgr error accessing database: " . $e->getMessage());
             return;
         }
-        foreach($queue as $item) {
+        foreach ($queue as $item) {
             /** @var QueuedJob $item */
             try {
                 $item->getJob()->handle();
@@ -82,48 +79,44 @@ class QueueManager
         Log::warning("Exception executing job ID:{$item->getId()}: {$class} | {$e->getMessage()}");
         $item->decrementAttempts();
         $this->queuedJobRepo->persist($item);
-        if($item->failed()) {
+        if ($item->failed()) {
             $class = get_class($item->getJob());
             Log::error("Job ID:{$item->getId()} ({$class}) has failed and will not be retried.");
         }
     }
 
-    /**
-     * @param Integer $days
-     * @return Collection
-     */
-    public function recent($days)
+    public function recent(int $days): Collection
     {
         return $this->queuedJobRepo->recent(intval($days));
     }
 
-    public function allFailed()
+    public function allFailed(): Collection
     {
         return $this->queuedJobRepo->allFailed();
     }
 
-    public function clearFailed()
+    public function clearFailed(): void
     {
         $this->queuedJobRepo->clearFailed();
     }
 
-    public function pause(int $minutes = 10) : bool
+    public function pause(int $minutes = 10): bool
     {
         return $this->lock->pause($minutes);
     }
 
-    public function resume() : bool
+    public function resume(): bool
     {
         return $this->lock->resume();
     }
 
-    public function status(int $hours = 24) : string
+    public function status(int $hours = 24): string
     {
         $outstanding = $this->queuedJobRepo->allOutstanding()->count();
         $failed = $this->queuedJobRepo->allFailed()->count();
         $completed = $this->queuedJobRepo->completed($hours);
         $completedCount = $completed->count();
-        $totalTime = $completed->reduce(function($total, QueuedJob $job) {
+        $totalTime = $completed->reduce(function ($total, QueuedJob $job) {
             return $total + $job->processingTime();
         }, 0);
         $avgTime = $completedCount ? number_format($totalTime / $completedCount, 1) : 0;

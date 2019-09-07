@@ -1,25 +1,21 @@
-#Queue Manager
+# Queue Manager
 
 Simple job queue package for Laravel 5
 
 Install via `config/app.php`:
-Add to $providers: `NZTim\Queue\QueueServiceProvider::class,`
-Add to $aliases: `'QueueMgr' => NZTim\Queue\QueueMgrFacade::class,`
+Register provider: `NZTim\Queue\QueueServiceProvider::class,`
 
 `php artisan queuemgr:migration` to add migration file
 `php artisan migrate` to run it and add the `queuemgrjobs` table
 
-Optional `.env` settings:
-- `QUEUEMGR_ATTEMPTS` sets the default number of attempts for a job, default is 5 times
-- `QUEUEMGR_TIMEOUT` sets the number of minutes before automatic timeout, default is 20
-
-###Usage
+### Usage
 
 - Jobs must implement `NZTim\Queue\Job` interface, which consists solely of a `handle()` method.
-- `QueueMgr::add(new Job)` adds a `Job` to the queue, or use helper function: `qa(new Job)`
-- `php artisan queuemgr:process` runs all the jobs in the queue.  Job failures will be logged as warnings, and final failures as errors.
-- `php artisan queuemgr:daemon` processes the queue repeatedly for at least as long as the period specified (seconds).
+- `$qm->add(new Job)` adds a `Job` to the queue, or use helper function: `qa(new Job)`
+- `php artisan queuemgr:process` runs all the jobs in the queue.
+    - Job failures will be logged as warnings, and final failures as errors.
 - Queue processing is normally triggered via cron.
+- `php artisan queuemgr:daemon 50` processes the queue repeatedly for at least as long as the period specified (seconds).
 - A lockfile is created in the storage folder to allow only only a single process to run.
   - It is recommended to not use `withoutOverlapping()` because if for any reason it's file mutex is not cleared then execution will halt indefinitely.
   - A warning will be logged if queue processing is skipped. This may indicate a lot of jobs or slow execution.
@@ -27,7 +23,7 @@ Optional `.env` settings:
 - Completed jobs are soft-deleted initially and purged after 1 month.
 - `php artisan queuemgr:pause 10` pauses the queue for the specified number of minutes or until manually resumed.
 - `php artisan queuemgr:resume` resumes paused queue processing if paused.
-  - Typically surround your deployments with `pause` and `resume`
+    - Typically surround your deployments with `pause` and `resume`
 - `php artisan queuemgr:logstatus` logs queue statistics for the last 24 hours
 
 Example Task Scheduler:
@@ -46,6 +42,7 @@ Other commands:
 - `php artisan queuemgr:clear` clears failed jobs from the queue
 
 ### Changelog
+  * 7.0: Remove facade and .env entries.
   * 6.4: Add retry command
   * 6: Replace cache lock with lockfile. Add `resume()` method.
     * To upgrade: add `resume` to deployment scripts after deployment is complete.

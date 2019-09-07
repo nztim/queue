@@ -1,6 +1,5 @@
 <?php namespace NZTim\Queue;
 
-use App;
 use Illuminate\Support\ServiceProvider;
 
 class QueueServiceProvider extends ServiceProvider
@@ -22,14 +21,6 @@ class QueueServiceProvider extends ServiceProvider
 
     public function register()
     {
-        App::bind('queuemgr', function() {
-            return App::make(QueueManager::class);
-        });
         $this->commands($this->commands);
-    }
-
-    public function boot()
-    {
-        //
     }
 }
