@@ -1,11 +1,13 @@
-<?php namespace NZTim\Queue\Commands;
+<?php
+
+namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
 use NZTim\Queue\QueueManager;
 
 class ClearFailedCommand extends Command
 {
-    protected $name = 'queuemgr:clear';
+    protected $name = 'qm:clear';
 
     protected $description = 'Clears all Queue Manager failed jobs';
 

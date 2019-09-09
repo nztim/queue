@@ -1,4 +1,6 @@
-<?php namespace NZTim\Queue;
+<?php
+
+namespace NZTim\Queue;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -6,17 +8,17 @@ class QueueServiceProvider extends ServiceProvider
 {
     protected $commands = [
         Commands\AddMigrationCommand::class,
-        Commands\ProcessCommand::class,
-        Commands\FailedCommand::class,
         Commands\ClearFailedCommand::class,
+        Commands\DaemonCommand::class,
+        Commands\DumpCommand::class,
+        Commands\FailedCommand::class,
         Commands\ListCommand::class,
-        Commands\Daemon::class,
-        Commands\Pause::class,
-        Commands\Resume::class,
-        Commands\LogStatus::class,
-        Commands\Status::class,
-        Commands\Dump::class,
-        Commands\Retry::class,
+        Commands\LogStatusCommand::class,
+        Commands\PauseCommand::class,
+        Commands\ProcessCommand::class,
+        Commands\ResumeCommand::class,
+        Commands\RetryCommand::class,
+        Commands\StatusCommand::class,
     ];
 
     public function register()

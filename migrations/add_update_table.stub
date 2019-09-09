@@ -3,23 +3,24 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateQueuemgrJobsTable extends Migration {
+class CreateUpdateQueuemgrJobsTable extends Migration {
 
     public function up()
     {
+        Schema::dropIfExists('queuemgrjobs');
         Schema::create('queuemgrjobs', function(Blueprint $table)
         {
             $table->bigIncrements('id');
+            $table->text('command');
             $table->tinyInteger('attempts')->unsigned();
-            $table->softDeletes();
-            $table->timestamps();
+            $table->dateTime('created');
+            $table->dateTime('updated');
+            $table->dateTime('completed')->nullable();
         });
-        // http://php.net/manual/en/function.serialize.php (BLOB not TEXT)
-        DB::statement("ALTER TABLE queuemgrjobs ADD job MEDIUMBLOB AFTER id");
     }
 
     public function down()
     {
-        Schema::drop('queuemgrjobs');
+        Schema::dropIfExists('queuemgrjobs');
     }
 }

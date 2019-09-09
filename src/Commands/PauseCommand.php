@@ -1,11 +1,13 @@
-<?php namespace NZTim\Queue\Commands;
+<?php
+
+namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
 use NZTim\Queue\QueueManager;
 
-class Pause extends Command
+class PauseCommand extends Command
 {
-    protected $signature = 'queuemgr:pause {minutes=10}';
+    protected $signature = 'qm:pause {minutes=10}';
     protected $description = 'Pauses queue processing for period specified';
 
     public function handle()

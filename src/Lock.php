@@ -3,15 +3,13 @@
 class Lock
 {
     protected $lockfile;
+
     const STATUS_EXEC = 'executing';
     const STATUS_PAUSED = 'paused';
 
     public function __construct(string $lockfile = null)
     {
-        if (is_null($lockfile)) {
-            $lockfile = storage_path('app' . DIRECTORY_SEPARATOR . 'nztqueuemgr.lock');
-        }
-        $this->lockfile = $lockfile;
+        $this->lockfile = is_null($lockfile) ? storage_path('app' . DIRECTORY_SEPARATOR . 'nztqueuemgr.lock') : $lockfile;
     }
 
     /**
@@ -30,7 +28,7 @@ class Lock
 
     public function clear()
     {
-        file_put_contents($this->lockfile, "0");
+        file_put_contents($this->lockfile, '0');
     }
 
     public function pause(int $timeoutMinutes): bool
@@ -53,7 +51,7 @@ class Lock
 
     protected function isPaused(): bool
     {
-        return $this->status() == static::STATUS_PAUSED;
+        return $this->status() === static::STATUS_PAUSED;
     }
 
     // Locked = executing or paused
@@ -62,6 +60,7 @@ class Lock
         return $this->status() ? true : false;
     }
 
+    /** @return string|false - STATUS_PAUSED, STATUS_EXEC or false */
     protected function status()
     {
         if (!file_exists($this->lockfile)) {
@@ -70,7 +69,8 @@ class Lock
         $lockdata = file_get_contents($this->lockfile);
         $exploded = explode('|', $lockdata);
         $locktime = intval($exploded[0]);
-        $locktype = isset($exploded[1]) ? $exploded[1] : '';
+        // If $locktime is 0 and $exploded[1] isn't set, then $locktime will never be > time(), so false is fine here
+        $locktype = isset($exploded[1]) ? $exploded[1] : false;
         return $locktime > time() ? $locktype : false;
     }
 

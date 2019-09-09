@@ -1,32 +1,25 @@
-<?php namespace NZTim\Queue\Commands;
+<?php
+
+namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
+use NZTim\Queue\QueuedJob\QueuedJob;
 use NZTim\Queue\QueueManager;
 
 class ListCommand extends Command
 {
-    protected $signature = 'queuemgr:list {days=7}';
+    protected $signature = 'qm:list {days=7}';
 
     protected $description = 'Lists recent jobs within the specified number of days';
-
-    /** @var QueueManager */
-    protected $queueManager;
-    protected $listJobs;
-
-    public function __construct(QueueManager $queueManager, ListJobs $listJobs)
-    {
-        $this->queueManager = $queueManager;
-        $this->listJobs = $listJobs;
-        parent::__construct();
-    }
 
     public function handle()
     {
         $days = $this->argument('days');
-        $entries = $this->queueManager->recent($days);
-        $jobs = $this->listJobs->table($entries);
-        if (count($jobs)) {
-            $this->table(array_keys($jobs[0]), $jobs);
+        $jobs = app(QueueManager::class)->recent($days);
+        $table = app(MakeTable::class)->fromJobs($jobs);
+        if (count($table)) {
+            $this->table(array_keys($table[0]), $table);
         } else {
             $this->info('No jobs found');
         }

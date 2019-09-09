@@ -1,70 +1,131 @@
-<?php namespace NZTim\Queue\QueuedJob;
+<?php
 
-use BadMethodCallException;
+namespace NZTim\Queue\QueuedJob;
+
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use NZTim\Queue\Job;
 
-class QueuedJob extends Model
+class QueuedJob
 {
-    // Eloquent ===============================================================
-    protected $table = 'queuemgrjobs';
-    use SoftDeletes;
-    protected $dates = ['deleted_at'];
+    /** @var ?int */
+    private $id;
+    /** @var string - base64-encoded, serialized version of the command */
+    private $command;
+    /** @var int - how many tries before failing */
+    private $attempts;
+    /** @var Carbon */
+    private $created;
+    /** @var Carbon */
+    private $updated;
+    /** @var Carbon|null */
+    private $completed;
 
-    /*
-     * Completed jobs are soft-deleted and purged after 1 month
-     * Outstanding jobs are not deleted
-     * Jobs with 0 attempts remaining will not be retried
-     */
+    const DATE_FORMAT = 'Y-m-d H:i:s';
 
-    public function scopeOutstanding(Builder $query)
+    private function __construct() {}
+
+    public static function fromCommand(object $command, int $attempts = 5): QueuedJob
     {
-        return $query->where('attempts', '>', 0);
+        $job = new QueuedJob;
+        $job->id = null;
+        $job->command = base64_encode(serialize($command));
+        $job->attempts = $attempts;
+        $job->created = now();
+        $job->updated = now();
+        $job->completed = null;
+        return $job;
     }
 
-    public function scopeDeletedAndOld(Builder $query)
+    public static function fromDb(object $data): QueuedJob
     {
-        return $query->onlyTrashed()->where('deleted_at', '<', Carbon::now()->subMonth());
+        $job = new QueuedJob;
+        $job->id = $data->id;
+        $job->command = $data->command;
+        $job->attempts = $data->attempts;
+        $job->created = Carbon::createFromFormat(QueuedJob::DATE_FORMAT, $data->created);
+        $job->updated = Carbon::createFromFormat(QueuedJob::DATE_FORMAT, $data->updated);
+        $job->completed = $data->completed ? Carbon::createFromFormat(QueuedJob::DATE_FORMAT, $data->completed) : null;
+        return $job;
     }
 
-    public function scopeAllFailed(Builder $query)
+    public function toDb(): array
     {
-        return $query->where('attempts', 0);
+        return [
+            'command'   => $this->command,
+            'attempts'  => $this->attempts,
+            'created'   => $this->created,
+            'updated'   => $this->updated,
+            'completed' => $this->completed,
+        ];
     }
 
-    // Entity =================================================================
+    // Read -------------------------------------------------------------------
 
-    public function getId(): int
+    public function id(): ?int
     {
         return $this->id;
     }
 
-    public function getJob()
+    public function command(): object
     {
-        return unserialize($this->job);
+        return unserialize(base64_decode($this->command));
     }
 
-    public function decrementAttempts()
+    public function attempts(): int
     {
-        $this->attempts--;
-        if ($this->attempts < 0) {
-            throw new BadMethodCallException('Cannot decrement attempts lower than 0');
-        }
+        return $this->attempts;
     }
 
     public function failed(): bool
     {
-        return $this->attempts == 0 ? true : false;
+        return $this->attempts === 0;
     }
 
     public function processingTime(): int
     {
-        if (is_null($this->deleted_at)) {
+        if (is_null($this->completed)) {
             return 0;
         }
-        return $this->deleted_at->diffInSeconds($this->created_at);
+        return $this->completed->diffInSeconds($this->created);
+    }
+
+    public function created(): Carbon
+    {
+        return $this->created;
+    }
+
+    public function updated(): Carbon
+    {
+        return $this->updated;
+    }
+
+    public function completed(): ?Carbon
+    {
+        return $this->completed;
+    }
+
+    // Write ------------------------------------------------------------------
+
+    public function touch(): void
+    {
+        $this->updated = now();
+    }
+
+    public function setComplete(): void
+    {
+        $this->completed = now();
+    }
+
+    public function retry(): void
+    {
+        if (!$this->attempts) {
+            $this->attempts++;
+        }
+    }
+
+    public function decrementAttempts(): void
+    {
+        if ($this->attempts > 0) {
+            $this->attempts--;
+        }
     }
 }

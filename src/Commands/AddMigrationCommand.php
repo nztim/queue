@@ -1,22 +1,23 @@
-<?php namespace NZTim\Queue\Commands;
+<?php
+
+namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\Migrations\MigrationCreator;
 
 class AddMigrationCommand extends Command
 {
-    protected $name = 'queuemgr:migration';
+    protected $signature = 'qm:migration';
 
     protected $description = 'Add database migration for Queue Manager';
 
     public function handle()
     {
-        // Create a new migration
-        $name = 'create_queuemgr_jobs_table';
-        $ds = DIRECTORY_SEPARATOR;
-        $path = database_path().$ds.'migrations';
-        $filename = $this->laravel['migration.creator']->create($name, $path);
+        /** @var MigrationCreator $migrationCreator */
+        $migrationCreator = app('migration.creator');
+        $filename = $migrationCreator->create('create_update_queuemgr_jobs_table', database_path('migrations'));
         // Overwrite with migration content
-        $content = file_get_contents(__DIR__.$ds.'..'.$ds.'migration.stub');
-        file_put_contents($filename, $content);
+        $stub = __DIR__. '/../../migrations/add_update_table.stub';
+        file_put_contents($filename, file_get_contents($stub));
     }
 }

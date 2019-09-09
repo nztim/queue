@@ -1,11 +1,13 @@
-<?php namespace NZTim\Queue\Commands;
+<?php
+
+namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
 use NZTim\Queue\QueueManager;
 
-class LogStatus extends Command
+class LogStatusCommand extends Command
 {
-    protected $signature = 'queuemgr:logstatus {hours=24}';
+    protected $signature = 'qm:logstatus {hours=24}';
     protected $description = 'Logs queue status over the specified period (default 24 hours)';
 
     public function handle()

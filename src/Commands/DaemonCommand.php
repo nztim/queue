@@ -1,11 +1,13 @@
-<?php namespace NZTim\Queue\Commands;
+<?php
+
+namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
 use NZTim\Queue\QueueManager;
 
-class Daemon extends Command
+class DaemonCommand extends Command
 {
-    protected $signature = 'queuemgr:daemon {seconds=50}';
+    protected $signature = 'qm:daemon {seconds=50}';
     protected $description = 'Runs process command repeatedly for the period required';
 
     public function handle()

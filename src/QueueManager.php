@@ -1,103 +1,107 @@
 <?php namespace NZTim\Queue;
 
+use Illuminate\Log\Logger;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
+use NZTim\CommandBus\CommandBus;
 use NZTim\Queue\QueuedJob\QueuedJob;
-use NZTim\Queue\QueuedJob\QueuedJobRepository;
+use NZTim\Queue\QueuedJob\QueuedJobRepo;
+use ReflectionClass;
 use Throwable;
 
 class QueueManager
 {
-    private $attempts;
+    private $bus;
+    private $repo;
     private $lock;
-    private $queuedJobRepo;
+    private $logger;
     private $timeoutMinutes;
-    private $secondsBetweenAttempts = 10;
 
-    public function __construct(QueuedJobRepository $queuedJobRepo, Lock $lock, int $timeoutMinutes = 20, int $attempts = 5)
+    public function __construct(CommandBus $bus, QueuedJobRepo $repo, Lock $lock, Logger $logger, int $timeoutMinutes = 20)
     {
-        $this->timeoutMinutes = $timeoutMinutes;
-        $this->attempts = $attempts;
-        $this->queuedJobRepo = $queuedJobRepo;
+        $this->bus = $bus;
+        $this->repo = $repo;
         $this->lock = $lock;
+        $this->logger = $logger;
+        $this->timeoutMinutes = $timeoutMinutes;
     }
 
-    public function add(Job $job): void
+    public function add(object $command): void
     {
-        $job = $this->queuedJobRepo->newInstance($job, $this->attempts);
-        $this->queuedJobRepo->persist($job);
+        $job = QueuedJob::fromCommand($command);
+        $this->repo->persist($job);
     }
 
-    public function process()
+    public function process(): void
     {
         if (!$this->lock->set($this->timeoutMinutes)) {
-            info('QueueMgr triggered but process already running');
+            $this->logger->info('QueueMgr triggered but process already running');
             return;
         }
         $this->executeJobs();
         $this->lock->clear();
     }
 
-    public function daemon(int $runtimeSeconds = 0)
+    public function daemon(int $runtimeSeconds = 0, int $secondsBetweenAttempts = 5): void
     {
         $timeoutMinutes = intval(ceil($runtimeSeconds / 60)) + $this->timeoutMinutes;
         if (!$this->lock->set($timeoutMinutes)) {
-            info('QueueMgr triggered but process already running');
+            $this->logger->info('QueueMgr triggered but process already running');
             return;
         }
         $start = time();
         while ((time() - $start) < $runtimeSeconds) {
             $this->executeJobs();
-            sleep($this->secondsBetweenAttempts);
+            sleep($secondsBetweenAttempts);
         }
         $this->lock->clear();
     }
 
-    protected function executeJobs()
+    private function executeJobs()
     {
         try {
-            $this->queuedJobRepo->purgeDeleted();
-            $queue = $this->queuedJobRepo->allOutstanding();
+            $this->repo->purgeCompleted();
+            $queue = $this->repo->outstanding();
         } catch (Throwable $e) {
-            Log::error("QueueMgr error accessing database: " . $e->getMessage());
+            $this->logger->error("QueueMgr error accessing database: " . $e->getMessage());
             return;
         }
-        foreach ($queue as $item) {
-            /** @var QueuedJob $item */
+        foreach ($queue as $job) {
+            /** @var QueuedJob $job */
             try {
-                $item->getJob()->handle();
-                $this->queuedJobRepo->delete($item);
+                $this->bus->handle($job->command());
+                $job->setComplete();
+                $this->repo->persist($job);
             } catch (Throwable $e) {
-                $this->handleException($item, $e);
+                $this->handleException($job, $e);
             }
         }
     }
 
-    protected function handleException(QueuedJob $item, Throwable $e)
+    protected function handleException(QueuedJob $job, Throwable $e)
     {
-        $class = (new \ReflectionClass($e))->getShortName();
-        Log::warning("Exception executing job ID:{$item->getId()}: {$class} | {$e->getMessage()}");
-        $item->decrementAttempts();
-        $this->queuedJobRepo->persist($item);
-        if ($item->failed()) {
-            $class = get_class($item->getJob());
-            Log::error("Job ID:{$item->getId()} ({$class}) has failed and will not be retried.");
+        $class = (new ReflectionClass($e))->getShortName();
+        $this->logger->warning("Exception executing job ID:{$job->id()}: {$class} | {$e->getMessage()}");
+        $job->decrementAttempts();
+        $this->repo->persist($job);
+        if ($job->failed()) {
+            $class = get_class($job->command());
+            $this->logger->error("Job ID:{$job->id()} ({$class}) has failed and will not be retried.");
         }
     }
 
     public function recent(int $days): Collection
     {
-        return $this->queuedJobRepo->recent(intval($days));
+        return $this->repo->recent(intval($days));
     }
 
     public function allFailed(): Collection
     {
-        return $this->queuedJobRepo->allFailed();
+        return $this->repo->failed();
     }
 
     public function clearFailed(): void
     {
-        $this->queuedJobRepo->clearFailed();
+        $this->repo->clearFailed();
     }
 
     public function pause(int $minutes = 10): bool
@@ -112,9 +116,9 @@ class QueueManager
 
     public function status(int $hours = 24): string
     {
-        $outstanding = $this->queuedJobRepo->allOutstanding()->count();
-        $failed = $this->queuedJobRepo->allFailed()->count();
-        $completed = $this->queuedJobRepo->completed($hours);
+        $outstanding = $this->repo->outstanding()->count();
+        $failed = $this->repo->failed()->count();
+        $completed = $this->repo->completed($hours);
         $completedCount = $completed->count();
         $totalTime = $completed->reduce(function ($total, QueuedJob $job) {
             return $total + $job->processingTime();
@@ -125,6 +129,10 @@ class QueueManager
 
     public function logStatus(int $hours = 24)
     {
-        Log::info($this->status($hours));
+        if ($this->allFailed()->count()) {
+            $this->logger->warning($this->status($hours));
+        } else {
+            $this->logger->info($this->status($hours));
+        }
     }
 }

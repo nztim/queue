@@ -1,12 +1,14 @@
-<?php namespace NZTim\Queue\Commands;
+<?php
+
+namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
 use NZTim\Queue\QueueManager;
 
-class Resume extends Command
+class ResumeCommand extends Command
 {
-        protected $signature = 'queuemgr:resume';
-        protected $description = 'Resume paused queue processing';
+    protected $signature = 'qm:resume';
+    protected $description = 'Resume paused queue processing';
 
     public function handle()
     {

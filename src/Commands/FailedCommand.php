@@ -1,26 +1,21 @@
-<?php namespace NZTim\Queue\Commands;
+<?php
+
+namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
 use NZTim\Queue\QueueManager;
 
 class FailedCommand extends Command
 {
-    protected $name = 'queuemgr:failed';
+    protected $name = 'qm:failed';
     protected $description = 'Lists failed jobs';
-    protected $listJobs;
-
-    public function __construct(ListJobs $listJobs)
-    {
-        $this->listJobs = $listJobs;
-        parent::__construct();
-    }
 
     public function handle()
     {
-        $entries = app(QueueManager::class)->allFailed();
-        $jobs = $this->listJobs->table($entries);
-        if (count($jobs)) {
-            $this->table(array_keys($jobs[0]), $jobs);
+        $jobs = app(QueueManager::class)->allFailed();
+        $table = app(MakeTable::class)->fromJobs($jobs);
+        if (count($table)) {
+            $this->table(array_keys($table[0]), $table);
         } else {
             $this->info('No failed jobs found');
         }
