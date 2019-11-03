@@ -66,7 +66,6 @@ class QueueManager
             return;
         }
         foreach ($queue as $job) {
-            /** @var QueuedJob $job */
             try {
                 $this->bus->handle($job->command());
                 $job->setComplete();

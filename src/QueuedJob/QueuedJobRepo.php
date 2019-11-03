@@ -24,6 +24,7 @@ class QueuedJobRepo
         return $row ? QueuedJob::fromDb($row) : null;
     }
 
+    /** @return Collection|QueuedJob[] */
     public function outstanding(): Collection
     {
         $rows = $this->db->table($this->table)->whereNull('completed')->where('attempts', '>', 0)->get();
