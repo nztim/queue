@@ -3,8 +3,6 @@
 namespace NZTim\Queue\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
-use NZTim\Queue\QueuedJob\QueuedJob;
 use NZTim\Queue\QueueManager;
 
 class ListCommand extends Command

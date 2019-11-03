@@ -52,6 +52,7 @@ class QueuedJobRepo
     {
         $rows = $this->db->table($this->table)
             ->where('attempts', 0)
+            ->whereNull('completed')
             ->orderBy('id', 'asc')
             ->get();
         return $this->hydrate($rows);
