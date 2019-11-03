@@ -94,4 +94,11 @@ class QueuedJobRepo
             ->whereNull('completed')
             ->update(['completed' => now()]);
     }
+
+    public function delete(int $id): void
+    {
+        $this->db->table($this->table)
+            ->where('id', $id)
+            ->delete();
+    }
 }

@@ -67,7 +67,16 @@ class QueuedJob
 
     public function command(): object
     {
-        return unserialize(base64_decode($this->command));
+        try {
+            return unserialize(base64_decode($this->command));
+        } catch (\Throwable $e) {
+            throw new UnserializeError("Error unserializing id:" . $this->id() . "\n" . $e->getMessage());
+        }
+    }
+
+    public function rawCommand(): string
+    {
+        return $this->command;
     }
 
     public function attempts(): int

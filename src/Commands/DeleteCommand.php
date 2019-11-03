@@ -5,10 +5,10 @@ namespace NZTim\Queue\Commands;
 use Illuminate\Console\Command;
 use NZTim\Queue\QueuedJob\QueuedJobRepo;
 
-class DumpCommand extends Command
+class DeleteCommand extends Command
 {
-    protected $signature = 'qm:dump {id}';
-    protected $description = 'Shows the content of the specified job';
+    protected $signature = 'qm:delete {id}';
+    protected $description = 'Deletes a specified job';
 
     public function handle()
     {
@@ -20,5 +20,8 @@ class DumpCommand extends Command
         }
         $dump = new Dump($this->output);
         $dump->toOutput($job);
+        if ($this->confirm("Proceed with delete?")) {
+            app(QueuedJobRepo::class)->delete($id);
+        }
     }
 }
