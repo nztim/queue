@@ -2,10 +2,10 @@
 
 class Lock
 {
-    protected $lockfile;
+    private string $lockfile;
 
-    const STATUS_EXEC = 'executing';
-    const STATUS_PAUSED = 'paused';
+    public const STATUS_EXEC = 'executing';
+    public const STATUS_PAUSED = 'paused';
 
     public function __construct(string $lockfile = null)
     {

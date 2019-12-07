@@ -10,11 +10,11 @@ use Throwable;
 
 class QueueManager
 {
-    private $bus;
-    private $repo;
-    private $lock;
-    private $logger;
-    private $timeoutMinutes;
+    private CommandBus $bus;
+    private QueuedJobRepo $repo;
+    private Lock $lock;
+    private Logger $logger;
+    private int $timeoutMinutes;
 
     public function __construct(CommandBus $bus, QueuedJobRepo $repo, Lock $lock, Logger $logger, int $timeoutMinutes = 20)
     {

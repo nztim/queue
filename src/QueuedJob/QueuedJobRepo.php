@@ -8,8 +8,8 @@ use stdClass;
 
 class QueuedJobRepo
 {
-    private $db;
-    private $table = 'queuemgrjobs';
+    private Connection $db;
+    private string $table = 'queuemgrjobs';
 
     public function __construct(Connection $db)
     {

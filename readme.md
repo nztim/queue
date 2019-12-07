@@ -41,6 +41,7 @@ Other commands:
 - `php artisan qm:clear` clears failed jobs from the queue
 
 ### Changelog
+  * 9.0: Update to PHP 7.4 syntax
   * 8.0: Move to execution via command bus, remove use of Eloquent, major revision.
   * 7.0: Remove facade and .env entries.
   * 6.4: Add retry command

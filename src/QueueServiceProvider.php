@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 
 class QueueServiceProvider extends ServiceProvider
 {
-    protected $commands = [
+    protected array $commands = [
         Commands\AddMigrationCommand::class,
         Commands\ClearFailedCommand::class,
         Commands\DaemonCommand::class,

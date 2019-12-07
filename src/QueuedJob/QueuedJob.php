@@ -6,26 +6,22 @@ use Carbon\Carbon;
 
 class QueuedJob
 {
-    /** @var ?int */
-    private $id;
-    /** @var string - base64-encoded, serialized version of the command */
-    private $command;
-    /** @var int - how many tries before failing */
-    private $attempts;
-    /** @var Carbon */
-    private $created;
-    /** @var Carbon */
-    private $updated;
-    /** @var Carbon|null */
-    private $completed;
+    private ?int $id;
+    // base64-encoded, serialized version of the command
+    private string $command;
+    // how many tries before failing
+    private int $attempts;
+    private Carbon $created;
+    private Carbon $updated;
+    private ?Carbon $completed;
 
-    const DATE_FORMAT = 'Y-m-d H:i:s';
+    private const DATE_FORMAT = 'Y-m-d H:i:s';
 
     private function __construct() {}
 
     public static function fromCommand(object $command, int $attempts = 5): QueuedJob
     {
-        $job = new QueuedJob;
+        $job = new QueuedJob();
         $job->id = null;
         $job->command = base64_encode(serialize($command));
         $job->attempts = $attempts;
@@ -37,7 +33,7 @@ class QueuedJob
 
     public static function fromDb(object $data): QueuedJob
     {
-        $job = new QueuedJob;
+        $job = new QueuedJob();
         $job->id = $data->id;
         $job->command = $data->command;
         $job->attempts = $data->attempts;
