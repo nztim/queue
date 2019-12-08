@@ -4,7 +4,7 @@
     "license": "MIT",
     "require": {
         "php": ">=7.4",
-        "nztim/commandbus": "^2.0"
+        "nztim/commandbus": "^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "~8.0"
