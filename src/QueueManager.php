@@ -1,6 +1,6 @@
 <?php namespace NZTim\Queue;
 
-use Illuminate\Log\Logger;
+use Psr\Log\LoggerInterface;
 use Illuminate\Support\Collection;
 use NZTim\CommandBus\CommandBus;
 use NZTim\Queue\QueuedJob\QueuedJob;
@@ -13,10 +13,10 @@ class QueueManager
     private CommandBus $bus;
     private QueuedJobRepo $repo;
     private Lock $lock;
-    private Logger $logger;
+    private LoggerInterface $logger;
     private int $timeoutMinutes;
 
-    public function __construct(CommandBus $bus, QueuedJobRepo $repo, Lock $lock, Logger $logger, int $timeoutMinutes = 20)
+    public function __construct(CommandBus $bus, QueuedJobRepo $repo, Lock $lock, LoggerInterface $logger, int $timeoutMinutes = 20)
     {
         $this->bus = $bus;
         $this->repo = $repo;
